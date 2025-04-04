@@ -1,6 +1,7 @@
 package com.sistema.empresarial.Config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -8,11 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sistema.empresarial.Service.UsuarioServiceImpl;
 import com.sistema.empresarial.Validation.JwtAuthFilter;
@@ -23,51 +21,49 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private UsuarioServiceImpl usuarioService;
-	
+
 	@Autowired
 	private JwtService jwtService;
-	
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
-	public OncePerRequestFilter jwFilter() {
+	public JwtAuthFilter jwtFilter() {
 		return new JwtAuthFilter(jwtService, usuarioService);
 	}
-	
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth
-		.userDetailsService(usuarioService)
-		.passwordEncoder(passwordEncoder());
+		auth.userDetailsService(usuarioService).passwordEncoder(passwordEncoder());
 	}
-	
+
 	@Override
-	protected void configure( HttpSecurity http) throws Exception{
-		http
-		.csrf().disable()
-		.authorizeRequests()
-		    .antMatchers(HttpMethod.POST, "/api/usuario/auth")
-		        .permitAll()
-		    .anyRequest().authenticated()
-		.and()
-		    .sessionManagement()
-		    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		.and()
-		    .addFilterBefore( jwFilter(), UsernamePasswordAuthenticationFilter.class);
+	protected void configure(HttpSecurity http) throws Exception {
+	    http
+	        .csrf().disable()
+	        .authorizeRequests()
+	            .antMatchers("/", "/login", "/static/**").permitAll()
+	            .antMatchers(HttpMethod.POST, "/api/usuario").permitAll()
+	            .anyRequest().authenticated()
+	        .and()
+	        .formLogin()
+	            .loginPage("/login")
+	            .defaultSuccessUrl("/home", true)  // Redireciona para /home após login
+	            .failureUrl("/login?error=true")
+	            .permitAll()
+	        .and()
+	        .logout()
+	            .logoutUrl("/logout")
+	            .logoutSuccessUrl("/login?logout=true")
+	            .permitAll();
 	}
-	
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/v2/api-docs", 
-				"/configuration/ui",
-				"/swagger-resources/**",
-				"/configuration/security",
-				"/swagger-ui.html",
-				"/webjars/**");
+		web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
+				"/configuration/security", "/swagger-ui.html", "/webjars/**", "/static/**");
 	}
-	
 }

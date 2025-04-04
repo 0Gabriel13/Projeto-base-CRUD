@@ -1,6 +1,8 @@
 package com.sistema.empresarial.Service;
 
 import javax.transaction.Transactional;
+
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import com.sistema.empresarial.Exception.SenhaInvalidaException;
 import com.sistema.empresarial.Exception.UsuarioExisteException;
 import com.sistema.empresarial.Exception.UsuarioNaoEncontrado;
 import com.sistema.empresarial.Repository.UsuarioRepository;
+
 
 @Service
 public class UsuarioServiceImpl implements UserDetailsService {

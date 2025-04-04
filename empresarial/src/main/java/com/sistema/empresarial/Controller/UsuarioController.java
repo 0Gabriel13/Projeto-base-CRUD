@@ -1,6 +1,7 @@
 package com.sistema.empresarial.Controller;
 
 import javax.validation.Valid;
+		
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,45 +31,36 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-
 @RestController
-@RequestMapping("/api/usuario")
 @RequiredArgsConstructor
+@RequestMapping("/api/usuario")
 @Api("Api Usuários")
 public class UsuarioController {
 
-	
 	private final UsuarioServiceImpl usuarioService;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
-	
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@ApiOperation("Salvar um novo usuário")
-	@ApiResponses({
-		@ApiResponse(code = 201,message = "Usuário salvo com sucesso!"),
-		@ApiResponse(code = 400,message = "Erro de validação!"),
-		@ApiResponse(code = 403,message = "Acesso negado!")
-	})
+	@ApiResponses({ @ApiResponse(code = 201, message = "Usuário salvo com sucesso!"),
+			@ApiResponse(code = 400, message = "Erro de validação!"),
+			@ApiResponse(code = 403, message = "Acesso negado!") })
 	public Usuario salvar(@RequestBody @Valid Usuario usuario) {
 		String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
 		usuario.setSenha(senhaCriptografada);
 		return usuarioService.salvar(usuario);
 	}
-	
+
 	@PostMapping("/auth")
 	@ApiOperation("Autenticar um usuário e gerar token")
-	@ApiResponses({
-		@ApiResponse(code = 200,message = "Usuário autenticado com sucesso!"),
-		@ApiResponse(code = 401,message = "Credenciais inválidas!"),
-		@ApiResponse(code = 403,message = "Acesso negado!")
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Usuário autenticado com sucesso!"),
+			@ApiResponse(code = 401, message = "Credenciais inválidas!"),
+			@ApiResponse(code = 403, message = "Acesso negado!") })
 	public TokenDTO autenticar(@RequestBody CredenciaisDTO credenciais) {
 		try {
-			Usuario usuario = Usuario.builder()
-					.email(credenciais.getEmail())
-					.senha(credenciais.getSenha())
-					.build();
+			Usuario usuario = Usuario.builder().email(credenciais.getEmail()).senha(credenciais.getSenha()).build();
 			@SuppressWarnings("unused")
 			UserDetails usuarioAutenticado = usuarioService.autenticar(usuario);
 			String token = jwtService.gerarToken(usuario);
@@ -77,14 +69,12 @@ public class UsuarioController {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
 		}
 	}
-	
+
 	@GetMapping("/{id}")
 	@ApiOperation("Buscar um usuário por ID")
-	@ApiResponses({
-		@ApiResponse(code = 200,message = "Usuário não encontrado!"),
-		@ApiResponse(code = 404,message = "Usuário não encontrado para o ID informado!"),
-		@ApiResponse(code = 403,message = "Acesso negado!")	
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Usuário não encontrado!"),
+			@ApiResponse(code = 404, message = "Usuário não encontrado para o ID informado!"),
+			@ApiResponse(code = 403, message = "Acesso negado!") })
 	public Usuario buscarPorId(@PathVariable Integer id) {
 		try {
 			return usuarioService.buscarPorId(id);
@@ -92,15 +82,13 @@ public class UsuarioController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
-	
+
 	@PutMapping("/{id}")
 	@ApiOperation("Atualizar um usuário")
-	@ApiResponses({
-		@ApiResponse(code = 200,message = "Usuário atualizado com sucesso!"),
-		@ApiResponse(code = 404,message = "Usuário não encontrado para o ID informado!"),
-		@ApiResponse(code = 400,message = "Erro de validação!"),
-		@ApiResponse(code = 403,message = "Acesso negado!")
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Usuário atualizado com sucesso!"),
+			@ApiResponse(code = 404, message = "Usuário não encontrado para o ID informado!"),
+			@ApiResponse(code = 400, message = "Erro de validação!"),
+			@ApiResponse(code = 403, message = "Acesso negado!") })
 	public Usuario atualizar(@PathVariable Integer id, @RequestBody @Valid Usuario usuarioAtualizado) {
 		try {
 			return usuarioService.atualizar(id, usuarioAtualizado);
@@ -108,18 +96,16 @@ public class UsuarioController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
-	
+
 	@DeleteMapping("/{id}")
 	@ApiOperation("Deletar um usuário")
-	@ApiResponses({
-		@ApiResponse(code = 204,message = "Usuário deletado com sucesso!"),
-		@ApiResponse(code = 404,message = "Usuário não encontrado para o ID informado!"),
-		@ApiResponse(code = 403,message = "Acesso negado!")
-	})
+	@ApiResponses({ @ApiResponse(code = 204, message = "Usuário deletado com sucesso!"),
+			@ApiResponse(code = 404, message = "Usuário não encontrado para o ID informado!"),
+			@ApiResponse(code = 403, message = "Acesso negado!") })
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deletar(@PathVariable Integer id) {
 		try {
-			 usuarioService.deletar(id);
+			usuarioService.deletar(id);
 		} catch (UsuarioNaoEncontrado e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
