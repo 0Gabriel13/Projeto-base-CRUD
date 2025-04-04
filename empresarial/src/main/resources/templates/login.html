@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Millennium Soft - Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: #ffffff;
+        }
+        
+        /* Efeito Circuit Board - Corrigido para não interferir com os inputs */
+        .circuit-board {
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            background: 
+                linear-gradient(90deg, #0a0a1a 21px, transparent 1%) center,
+                linear-gradient(#0a0a1a 21px, transparent 1%) center,
+                #0d1127;
+            background-size: 22px 22px;
+            animation: moveCircuit 20s linear infinite;
+            z-index: 0;
+            pointer-events: none; /* Permite clicar através do elemento */
+        }
+        
+        @keyframes moveCircuit {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-50%, -50%); }
+        }
+        
+        /* Caminhos do circuito - também não interferem */
+        .circuit-path {
+            position: fixed;
+            background-color: rgba(0, 150, 255, 0.7);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .path-1 {
+            width: 300px; height: 2px;
+            top: 20%; left: -300px;
+            animation: movePath1 8s linear infinite;
+            box-shadow: 0 0 10px #0096ff;
+        }
+        
+        .path-2 {
+            width: 2px; height: 200px;
+            top: -200px; right: 30%;
+            animation: movePath2 10s linear infinite 2s;
+            box-shadow: 0 0 10px #0096ff;
+        }
+        
+        .path-3 {
+            width: 150px; height: 2px;
+            bottom: 15%; right: -150px;
+            animation: movePath3 6s linear infinite 1s;
+            box-shadow: 0 0 10px #0096ff;
+        }
+        
+        @keyframes movePath1 { 0% { left: -300px; } 100% { left: 100%; } }
+        @keyframes movePath2 { 0% { top: -200px; } 100% { top: 100%; } }
+        @keyframes movePath3 { 0% { right: -150px; } 100% { right: 100%; } }
+        
+        /* Container de login - Camada acima dos efeitos */
+        .login-container {
+            background-color: rgba(13, 17, 39, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+            padding: 40px;
+            width: 420px;
+            text-align: center;
+            position: relative;
+            z-index: 10; /* Garante que está acima dos efeitos */
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+        
+        /* Efeito de brilho - não interfere com interação */
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, transparent 45%, rgba(0, 150, 255, 0.1) 50%, transparent 55%);
+            transform: rotate(45deg);
+            animation: shine 6s infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(45deg) translate(-30%, -30%); }
+            100% { transform: rotate(45deg) translate(30%, 30%); }
+        }
+        
+        /* Estilo do cabeçalho */
+        h1 {
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-weight: 500;
+            font-size: 28px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .logo {
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .logo-text {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .millennium-text {
+            color: #0096ff;
+        }
+        
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #0096ff, transparent);
+        }
+        
+        /* Abas - Funcionamento perfeito */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+            position: relative;
+            z-index: 20;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            color: #a0a0c0;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .tab a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .tab.active, #login:target ~ .login-container #login-tab-btn, #register:target ~ .login-container #register-tab-btn {
+            color: #0096ff;
+        }
+        
+        .tab.active::after, #login:target ~ .login-container #login-tab-btn::after, #register:target ~ .login-container #register-tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #0096ff;
+        }
+        
+        /* Formulário - Totalmente interativo */
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+            position: relative;
+            z-index: 20;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0a0c0;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 150, 255, 0.1);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #0096ff;
+            box-shadow: 0 0 0 2px rgba(0, 150, 255, 0.2);
+        }
+        
+        /* Botão ACESSAR - Estilo e interação */
+        .btn {
+            background: linear-gradient(135deg, #0096ff, #0066ff);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 20;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 150, 255, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #0096ff;
+            margin-top: 10px;
+        }
+        
+        /* Sistema de abas com CSS */
+        .tab-content {
+            display: none;
+            position: relative;
+            z-index: 20;
+        }
+        
+        #login-tab {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #login:target ~ .login-container #login-tab,
+        #register:target ~ .login-container #register-tab {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        #login:target ~ .login-container #register-tab,
+        #register:target ~ .login-container #login-tab {
+            display: none;
+        }
+        
+        /* Nós do circuito - Efeito visual sem interferência */
+        .circuit-node {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background-color: #0096ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #0096ff;
+            z-index: 1;
+            animation: pulse 2s infinite;
+            pointer-events: none;
+        }
+        
+        .node-1 { top: 30%; left: 20%; }
+        .node-2 { bottom: 25%; right: 15%; animation-delay: 0.5s; }
+        .node-3 { top: 40%; right: 10%; animation-delay: 1s; }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+        
+        .url {
+            margin-top: 30px;
+            color: rgba(160, 160, 192, 0.7);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Âncoras para controle das abas -->
+    <span id="login"></span>
+    <span id="register"></span>
+    
+    <!-- Efeitos visuais que não interferem na interação -->
+    <div class="circuit-board"></div>
+    <div class="circuit-path path-1"></div>
+    <div class="circuit-path path-2"></div>
+    <div class="circuit-path path-3"></div>
+    <div class="circuit-node node-1"></div>
+    <div class="circuit-node node-2"></div>
+    <div class="circuit-node node-3"></div>
+    
+    <!-- Container de login - Camada interativa -->
+    <div class="login-container">
+        <h1>LOGIN</h1>
+        
+        <div class="logo">
+            <div class="logo-text"><span class="millennium-text">Millennium</span> Soft</div>
+        </div>
+        
+        <!-- Abas funcionais -->
+        <div class="tabs">
+            <div class="tab active" id="login-tab-btn">
+                <a href="#login">Login</a>
+            </div>
+            <div class="tab" id="register-tab-btn">
+                <a href="#register">Registrar</a>
+            </div>
+        </div>
+        
+        <!-- Formulário de Login -->
+        <div id="login-tab" class="tab-content">
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input type="text" id="username" name="username" placeholder="Seu email" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" placeholder="Sua senha" required>
+                </div>
+                
+                <button type="submit" class="btn">ACESSAR</button>
+            </form>
+        </div>
+        
+        <!-- Formulário de Registro -->
+        <div id="register-tab" class="tab-content">
+            <form th:action="@{/register}" method="post">
+                <div class="form-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" name="email" placeholder="Seu email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-password">Senha</label>
+                    <input type="password" id="reg-password" name="senha" placeholder="Sua senha" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-name">Nome Completo</label>
+                    <input type="text" id="reg-name" name="nome" placeholder="Seu nome completo" required>
+                </div>
+                
+                <button type="submit" class="btn">REGISTRAR</button>
+                <a href="#login" class="btn btn-secondary">VOLTAR PARA LOGIN</a>
+            </form>
+        </div>
+        
+        <div class="url">Criado por Gabriel Oliveira</div>
+    </div>
+</body>
+</html>

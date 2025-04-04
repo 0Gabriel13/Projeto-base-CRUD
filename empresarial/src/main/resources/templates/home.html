@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Millennium Soft - Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #0a0a1a;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Circuit board background */
+        .circuit-board {
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            background: 
+                linear-gradient(90deg, #0a0a1a 21px, transparent 1%) center,
+                linear-gradient(#0a0a1a 21px, transparent 1%) center,
+                #0d1127;
+            background-size: 22px 22px;
+            animation: moveCircuit 20s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes moveCircuit {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        /* Animated circuit paths */
+        .circuit-path {
+            position: fixed;
+            background-color: rgba(0, 150, 255, 0.7);
+            z-index: 1;
+        }
+        
+        .path-1 {
+            width: 300px;
+            height: 2px;
+            top: 20%;
+            left: -300px;
+            animation: movePath1 8s linear infinite;
+            box-shadow: 0 0 10px #0096ff;
+        }
+        
+        @keyframes movePath1 {
+            0% {
+                left: -300px;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .path-2 {
+            width: 2px;
+            height: 200px;
+            top: -200px;
+            right: 30%;
+            animation: movePath2 10s linear infinite 2s;
+            box-shadow: 0 0 10px #0096ff;
+        }
+        
+        @keyframes movePath2 {
+            0% {
+                top: -200px;
+            }
+            100% {
+                top: 100%;
+            }
+        }
+        
+        .path-3 {
+            width: 150px;
+            height: 2px;
+            bottom: 15%;
+            right: -150px;
+            animation: movePath3 6s linear infinite 1s;
+            box-shadow: 0 0 10px #0096ff;
+        }
+        
+        @keyframes movePath3 {
+            0% {
+                right: -150px;
+            }
+            100% {
+                right: 100%;
+            }
+        }
+        
+        /* Header */
+        header {
+            background-color: rgba(13, 17, 39, 0.9);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+        }
+        
+        .logo-text {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .millennium-text {
+            color: #0096ff;
+        }
+        
+        .user-info {
+            color: #a0a0c0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            color: #ffffff;
+            font-weight: 500;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #0096ff;
+            color: #0096ff;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(0, 150, 255, 0.1);
+        }
+        
+        /* Main content */
+        .main-content {
+            position: relative;
+            z-index: 2;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .welcome-message {
+            color: #ffffff;
+            font-size: 32px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .welcome-message::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #0096ff, transparent);
+        }
+        
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .card {
+            background-color: rgba(13, 17, 39, 0.7);
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 150, 255, 0.1);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                transparent,
+                rgba(0, 150, 255, 0.05),
+                transparent
+            );
+            z-index: -1;
+        }
+        
+        .card-title {
+            color: #0096ff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .card-content {
+            color: #a0a0c0;
+            line-height: 1.6;
+        }
+        
+        /* Circuit nodes animation */
+        .circuit-node {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background-color: #0096ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #0096ff;
+            z-index: 1;
+        }
+        
+        .node-1 {
+            top: 30%;
+            left: 20%;
+            animation: pulse 2s infinite;
+        }
+        
+        .node-2 {
+            bottom: 25%;
+            right: 15%;
+            animation: pulse 2s infinite 0.5s;
+        }
+        
+        .node-3 {
+            top: 40%;
+            right: 10%;
+            animation: pulse 2s infinite 1s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Circuit board background -->
+    <div class="circuit-board"></div>
+    
+    <!-- Animated circuit paths -->
+    <div class="circuit-path path-1"></div>
+    <div class="circuit-path path-2"></div>
+    <div class="circuit-path path-3"></div>
+    
+    <!-- Circuit nodes -->
+    <div class="circuit-node node-1"></div>
+    <div class="circuit-node node-2"></div>
+    <div class="circuit-node node-3"></div>
+    
+    <!-- Trecho relevante da home.html -->
+<header>
+    <div class="logo-text"><span class="millennium-text">Millennium</span> Soft</div>
+    <div class="user-info">
+        <span>Bem-vindo, <span class="user-name" th:text="${username}">Usuário</span></span>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">Sair</button>
+        </form>
+    </div>
+</header>
+    
+    <!-- Main content -->
+    <div class="main-content">
+        <h1 class="welcome-message">Bem-vindo ao Sistema Millennium</h1>
+        
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3 class="card-title">Dashboard</h3>
+                <p class="card-content">Acesse todas as funcionalidades do sistema através deste painel de controle.</p>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Relatórios</h3>
+                <p class="card-content">Gere relatórios personalizados e visualize dados em tempo real.</p>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Configurações</h3>
+                <p class="card-content">Personalize suas preferências e configurações de conta.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
